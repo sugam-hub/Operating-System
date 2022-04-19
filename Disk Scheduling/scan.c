@@ -1,87 +1,82 @@
-
-/*
-SCAN - Disk Scheduling Algorithm (Elevator)
-
-scans down towards the nearest end and then when it hits the bottom,
-it scans up servicing the requests that it didn't get going down.
-If a request comes in after it has been scanned it will not be serviced
-until the process comes back down or moves back up.
-
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
+int main()
+{
+    int RQ[100], i, j, n, TotalHeadMoment = 0, initial, size, move;
+    printf("Enter the number of Requests\n");
+    scanf("%d", &n);
+    printf("Enter the Requests sequence\n");
+    for (i = 0; i < n; i++)
+        scanf("%d", &RQ[i]);
+    printf("Enter initial head position\n");
+    scanf("%d", &initial);
+    printf("Enter total disk size\n");
+    scanf("%d", &size);
+    printf("Enter the head movement direction for high 1 and for low 0\n");
+    scanf("%d", &move);
 
-#define LOW 0
-#define HIGH 199
+    // logic for Scan disk scheduling
 
-
-int main(){
-  int queue[20];
-  int head, max, q_size, temp, sum;
-  int dloc; //location of disk (head) arr
-
-
-  printf("%s\t", "Input no of disk locations");
-  scanf("%d", &q_size);
-
-  printf("%s\t", "Enter head position");
-  scanf("%d", &head);
-
-  printf("%s\n", "Input elements into disk queue");
-  for(int i=0; i<q_size; i++){
-    scanf("%d", &queue[i]);
-  }
-
-  queue[q_size] = head; //add RW head into queue
-  q_size++;
-
-  //sort the array
-  for(int i=0; i<q_size;i++){
-    for(int j=i; j<q_size; j++){
-      if(queue[i]>queue[j]){
-        temp = queue[i];
-        queue[i] = queue[j];
-        queue[j] = temp;
-      }
+    /*logic for sort the request array */
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n - i - 1; j++)
+        {
+            if (RQ[j] > RQ[j + 1])
+            {
+                int temp;
+                temp = RQ[j];
+                RQ[j] = RQ[j + 1];
+                RQ[j + 1] = temp;
+            }
+        }
     }
-  }
 
-  max = queue[q_size-1];
-
-  //locate head in the queue
-  for(int i=0; i<q_size; i++){
-    if(head == queue[i]){
-      dloc = i;
-      break;
+    int index;
+    for (i = 0; i < n; i++)
+    {
+        if (initial < RQ[i])
+        {
+            index = i;
+            break;
+        }
     }
-  }
 
-  if(abs(head-LOW) <= abs(head-HIGH)){
+    // if movement is towards high value
+    if (move == 1)
+    {
+        for (i = index; i < n; i++)
+        {
+            TotalHeadMoment = TotalHeadMoment + abs(RQ[i] - initial);
+            initial = RQ[i];
+        }
+        //  last movement for max size
+        TotalHeadMoment = TotalHeadMoment + abs(size - RQ[i - 1] - 1);
+        initial = size - 1;
+        for (i = index - 1; i >= 0; i--)
+        {
+            TotalHeadMoment = TotalHeadMoment + abs(RQ[i] - initial);
+            initial = RQ[i];
+        }
+    }
+    // if movement is towards low value
+    else
+    {
+        for (i = index - 1; i >= 0; i--)
+        {
+            TotalHeadMoment = TotalHeadMoment + abs(RQ[i] - initial);
+            initial = RQ[i];
+        }
+        //  last movement for min size
+        TotalHeadMoment = TotalHeadMoment + abs(RQ[i + 1] - 0);
+        initial = 0;
+        for (i = index; i < n; i++)
+        {
+            TotalHeadMoment = TotalHeadMoment + abs(RQ[i] - initial);
+            initial = RQ[i];
+        }
+    }
 
-      for(int j=dloc; j>=0; j--){
-        printf("%d --> ",queue[j]);
-      }
-      for(int j=dloc+1; j<q_size; j++){
-        printf("%d --> ",queue[j]);
-      }
-
-      } else {
-
-      for(int j=dloc+1; j<q_size; j++){
-          printf("%d --> ",queue[j]);
-      }
-      for(int j=dloc; j>=0; j--){
-          printf("%d --> ",queue[j]);
-      }
-
-  }
-
-
-
-
-  sum  = head + max;
-  printf("\nmovement of total cylinders %d", sum);
-
-  return 0;
+    printf("Total head movement is %d", TotalHeadMoment);
+    return 0;
 }

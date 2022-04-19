@@ -1,58 +1,50 @@
-/*
-  SSTF Disk Scheduling Algorithm
-*/
+#include "stdio.h"
+#include "stdlib.h"
+#include "stdbool.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+struct request
+{
+    int request_track_number;
+    bool visited;
+};
 
-int main() {
-  int queue[100], queue2[100], q_size, head, seek=0, temp;
-  float avg;
+int main()
+{
+    int i, no_of_requests, initial_head, limit, j, choice, previous_head;
+    printf("Enter the number of requests: ");
+    scanf("%d", &no_of_requests);
+    struct request req[no_of_requests];
+    printf("Enter the requests: ");
+    for (i = 0; i < no_of_requests; ++i)
+    {
+        scanf("%d", &req[i].request_track_number);
+        req[i].visited = false;
+    }
+    printf("Enter initial position of R/W head: ");
+    scanf("%d", &initial_head);
 
-  printf("%s\n", "-----SSTF Disk Scheduling Algorithm-----");
-
-  printf("%s\n", "Enter the size of the queue");
-  scanf("%d", &q_size);
-
-  printf("%s\n", "Enter queue elements");
-  for(int i=0; i<q_size; i++){
-    scanf("%d",&queue[i]);
-  }
-
-  printf("%s\n","Enter initial head position");
-  scanf("%d", &head);
-
-  //get distance from head of elems in queue
-  for(int i=0; i<q_size; i++){
-    queue2[i] = abs(head-queue[i]);
-  }
-
-  //swap elems based on their distance from each other
-  for(int i=0; i<q_size; i++){
-      for(int j=i+1; j<q_size;j++){
-
-        if(queue2[i]>queue2[j]){
-            temp = queue2[i];
-            queue2[i]=queue[j];
-            queue2[j]=temp;
-
-            temp=queue[i];
-            queue[i]=queue[j];
-            queue[j]=temp;
+    int seek_time = 0;
+    printf("%d -> ", initial_head);
+    int n = no_of_requests;
+    while (n)
+    {
+        int min = 1e9;
+        int min_track_number, position;
+        for (i = 0; i < no_of_requests; i++)
+        {
+            if (abs(initial_head - req[i].request_track_number) < min && req[i].visited == false)
+            {
+                min = abs(initial_head - req[i].request_track_number);
+                min_track_number = req[i].request_track_number;
+                position = i;
+            }
         }
+        initial_head = req[position].request_track_number;
+        req[position].visited = true;
+        printf("%d ->", min_track_number);
+        seek_time += min;
+        n--;
     }
 
-  }
-
-  for(int i=1; i<q_size; i++){
-    seek = seek+abs(head-queue[i]);
-    head = queue[i];
-  }
-
-  printf("\nTotal seek time is %d\t",seek);
-  avg = seek/(float)q_size;
-  printf("\nAverage seek time is %f\t", avg);
-
-  return 0;
+    printf("\nSeek Time: %d\n", seek_time);
 }
